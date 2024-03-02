@@ -731,6 +731,26 @@ function update_game_nobles() {
     });
 }
 
+function update_game_cards() {
+  fetch("/replay/cards")
+    .then(response => response.json())
+    .then(response => {
+      // Clear all cards first 
+      for (let tier = 0; tier < 3; tier++) {
+        for (let index = 0; index < 4; index++) {
+          document.getElementById('lv' + tier + '_' + index).innerHTML = "" 
+        }
+      }
+      // Then update from backend
+      response.success.cards.forEach((row, _) => {
+        row.forEach((card, index) => {
+          document.getElementById('lv' + card.tier + '_' + index).innerHTML = generateSvgCard(card.colorIndex, card.points, card.tokens);
+        })
+      });
+
+    });
+}
+
 // TODO: Inject all server code here, this is called after 
 // an ai move, see callers ai_play_one_move, ai_play_if_needed
 function refreshBoard() {
@@ -741,18 +761,12 @@ function refreshBoard() {
 	}
 
   update_game_nobles()
+  update_game_cards()
 
 	for (let tier = 2; tier >= 0; tier--) {
-		for (let index = 0; index < 4; index++) {
-			let cardInfo = game.getTierCard(tier, index);
-      /// [tier, points, colors] = cardInfo
-      //  TODO: [Bug] Need to make provisions for card not being available
-			//let selectMode = _getSelectMode('card', tier*4+index, lastAction);
-			document.getElementById('lv' + tier + '_' + index).innerHTML = `<a onclick="clickToSelect('card', ${tier*4+index});event.preventDefault();"> ${generateSvgCard(cardInfo[0], cardInfo[1], cardInfo[2], false)} </a>`;
-		}
-		let selectMode = _getSelectMode('deck', tier, lastAction);
+		//let selectMode = _getSelectMode('deck', tier, lastAction);
 		let nbCardsInDeck = game.getNbCardsInDeck(tier);
-		document.getElementById('lv' + tier + '_deck').innerHTML = `<a onclick="clickToSelect('deck', ${tier});event.preventDefault();"> ${generateDeck(nbCardsInDeck, selectMode)} </a>`;
+		document.getElementById('lv' + tier + '_deck').innerHTML = `${generateDeck(nbCardsInDeck, selectMode)}`;
 	}
 
 	for (let color = 0; color < 6; color++) {
