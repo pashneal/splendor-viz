@@ -792,13 +792,19 @@ function updateGamePlayers() {
 
         // Then update from backend
         player.developments.forEach(([colorIndex, amount], _) => {
-				  document.getElementById('p' + playerIndex + '_c' + colorIndex).innerHTML = generateSvgNbCards(colorIndex, amount);
+          let div = document.getElementById('p' + playerIndex + '_c' + colorIndex);
+          let svg = generateSvgNbCards(colorIndex, amount);
+          div.innerHTML = svg;
         });
         player.gems.forEach(([colorIndex, amount], _) => {
-				  document.getElementById('p' + playerIndex + '_g' + colorIndex).innerHTML = generateSvgGem(colorIndex, amount);
+          let div = document.getElementById('p' + playerIndex + '_g' + colorIndex);
+          let svg = generateSvgGem(colorIndex, amount);
+          div.innerHTML = svg;
         });
         player.reservedCards.forEach((card, reservedIndex) => {
-            document.getElementById('p' + playerIndex + '_r' + reservedIndex).innerHTML = generateSvgSmallCard(card.colorIndex, card.points, card.tokens);
+          let div = document.getElementById('p' + playerIndex + '_r' + reservedIndex);
+          let svg = generateSvgSmallCard(card.colorIndex, card.points, card.tokens);
+          div.innerHTML = svg;
         });
 
 		    document.getElementById('p' + playerIndex + '_details').innerHTML = generateTxtPoints(
