@@ -751,6 +751,21 @@ function update_game_cards() {
     });
 }
 
+function update_decks() {
+  fetch("/replay/decks")
+    .then(response => response.json())
+    .then(response => {
+      // Clear all decks first 
+      for (let tier = 0; tier < 3; tier++) {
+        document.getElementById('lv' + tier + '_deck').innerHTML = "" 
+      }
+      // Then update from backend
+      response.success.decks.forEach((deck, _) => {
+        document.getElementById('lv' + deck.tier + '_deck').innerHTML = generateDeck(deck.cardCount, false);
+      });
+    });
+}
+
 // TODO: Inject all server code here, this is called after 
 // an ai move, see callers ai_play_one_move, ai_play_if_needed
 function refreshBoard() {
@@ -762,12 +777,7 @@ function refreshBoard() {
 
   update_game_nobles()
   update_game_cards()
-
-	for (let tier = 2; tier >= 0; tier--) {
-		//let selectMode = _getSelectMode('deck', tier, lastAction);
-		let nbCardsInDeck = game.getNbCardsInDeck(tier);
-		document.getElementById('lv' + tier + '_deck').innerHTML = `${generateDeck(nbCardsInDeck, selectMode)}`;
-	}
+  update_decks()
 
 	for (let color = 0; color < 6; color++) {
 		let selectMode = _getSelectMode('gem', color);
