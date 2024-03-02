@@ -658,7 +658,6 @@ function generateSvgNoble(tokens, selected=0) {
 	// Draw background first
 	svg += `<rect width="100%" height="100%" fill="${bgColor}"/>`;
 	svg += `<rect width="50%" height="100%" fill="white" fill-opacity="50%"/>`;
-  console.log(tokens);
 	for (const [index, token] of tokens.entries()) {
 		let [x, y] = tokensCoordNoble[index];
 		let [col, tokValue] = tokens[index];
@@ -679,11 +678,11 @@ function generateDeck(number, selected) {
 	return svg;
 }
 
-function generateTxtPoints(player, scoreDetails, nbGems) {
-	let result = game.is_human_player(player) ? `You - ` : ` AI - `;
-	result += `${scoreDetails[0]} point${scoreDetails[0]>1 ? 's' : ''}`;
-	if (scoreDetails[2] > 0) {
-		result += ` (incl. ${scoreDetails[2]} <i class="chess queen icon"></i>)`;
+function generateTxtPoints(totalPoints, noblePoints, nbGems) {
+	let result = ` AI - `;
+	result += `${totalPoints} point${totalPoints !== 1 ? 's' : ''}`;
+	if (noblePoints > 0) {
+		result += ` (incl. ${noblePoints} <i class="chess queen icon"></i>)`;
 	}
 	result += ` - ${nbGems} <i class="gem icon"></i>`
 	return result;
@@ -786,61 +785,37 @@ function updateGamePlayers() {
     .then(response => response.json())
     .then(response => {
       response.success.players.forEach((player, playerIndex) => {
+        // Clear all reserved cards first
+        for (let reservedIndex = 0; reservedIndex < 3; reservedIndex++) {
+          document.getElementById('p' + playerIndex + '_r' + reservedIndex).innerHTML = ""
+        }
+
+        // Then update from backend
         player.developments.forEach(([colorIndex, amount], _) => {
 				  document.getElementById('p' + playerIndex + '_c' + colorIndex).innerHTML = generateSvgNbCards(colorIndex, amount);
         });
         player.gems.forEach(([colorIndex, amount], _) => {
 				  document.getElementById('p' + playerIndex + '_g' + colorIndex).innerHTML = generateSvgGem(colorIndex, amount);
         });
+        player.reservedCards.forEach((card, reservedIndex) => {
+            document.getElementById('p' + playerIndex + '_r' + reservedIndex).innerHTML = generateSvgSmallCard(card.colorIndex, card.points, card.tokens);
+        });
+
+		    document.getElementById('p' + playerIndex + '_details').innerHTML = generateTxtPoints(
+          player.totalPoints, 
+          player.noblePoints, 
+          player.totalGems
+        );
       });
     });
 }
-// TODO: Inject all server code here, this is called after 
-// an ai move, see callers ai_play_one_move, ai_play_if_needed
-function refreshBoard() {
-	let lastAction = ['none', -1];
-	if (move_sel.selectedType == 'none') {
-		// Display last action only if user is not selecting a move
-		lastAction = game.getLastActionDetails();
-	}
 
+function refreshBoard() {
   updateGameNobles()
   updateGameCards()
   updateGameDecks()
   updateGameBanks()
   updateGamePlayers()
-
-	for (let player = 0; player < nb_players; player++) {
-		for (let rsvIndex = 0; rsvIndex < 3; rsvIndex++) {
-      // TODO: Deal with reserved cards
-			let cardInfo = game.getPlayerReserved(player, rsvIndex);
-			
-			if (game.is_human_player(player)) {
-				if (cardInfo[0] < 0) {
-					document.getElementById('p' + player + '_r' + rsvIndex).innerHTML = ``;
-				} else {
-					let selectMode = _getSelectMode('buyrsv', rsvIndex);
-					document.getElementById('p' + player + '_r' + rsvIndex).innerHTML = `<a onclick="clickToSelect('buyrsv', ${rsvIndex});event.preventDefault();"> ${generateSvgSmallCard(cardInfo[0], cardInfo[1], cardInfo[2], selectMode)} </a>`;
-				}
-			} else {
-				let selectMode = (player == game.previousPlayer) ? _getSelectMode('buyrsv', rsvIndex, lastAction, currentMove=false) : 0;
-				if (cardInfo[0] < 0) {
-					if (selectMode == 0) {
-						document.getElementById('p' + player + '_r' + rsvIndex).innerHTML = ``;
-					} else {
-						document.getElementById('p' + player + '_r' + rsvIndex).innerHTML = `<svg viewBox="0 0 32 32">${_svgIfSelected(selectMode)}</svg>`;
-					}
-				} else {
-					document.getElementById('p' + player + '_r' + rsvIndex).innerHTML = generateSvgSmallCard(cardInfo[0], cardInfo[1], cardInfo[2], selectMode);
-				}
-			}
-		}
-
-		let scoreDetails = game.getPoints(player, details=true);
-		let nbGems = [...Array(6).keys()].reduce((sum, color) => sum + game.getPlayerGems(player, color), 0);
-    // TODO: Represent everything else (name?, points, number of gems) as a string
-		document.getElementById('p' + player + '_details').innerHTML = generateTxtPoints(player, scoreDetails, nbGems);
-	}
 }
 
 function refreshButtons(loading=false) {
