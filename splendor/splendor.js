@@ -786,7 +786,6 @@ function updateGamePlayers() {
     .then(response => response.json())
     .then(response => {
       response.success.players.forEach((player, playerIndex) => {
-        // Then update
         player.developments.forEach(([colorIndex, amount], _) => {
 				  document.getElementById('p' + playerIndex + '_c' + colorIndex).innerHTML = generateSvgNbCards(colorIndex, amount);
         });
