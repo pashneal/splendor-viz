@@ -766,6 +766,20 @@ function update_decks() {
     });
 }
 
+function update_bank() {
+  fetch("/replay/bank")
+    .then(response => response.json())
+    .then(response => {
+      // Clear all banks first 
+      for (let color = 0; color < 6; color++) {
+        document.getElementById('bank_c' + color).innerHTML = "" 
+      }
+      // Then update from backend
+      response.success.bank.forEach(([index, count], _) => {
+        document.getElementById('bank_c' + index).innerHTML = generateSvgGem(index, count, false, true, true);
+      });
+    });
+}
 // TODO: Inject all server code here, this is called after 
 // an ai move, see callers ai_play_one_move, ai_play_if_needed
 function refreshBoard() {
@@ -778,16 +792,7 @@ function refreshBoard() {
   update_game_nobles()
   update_game_cards()
   update_decks()
-
-	for (let color = 0; color < 6; color++) {
-		let selectMode = _getSelectMode('gem', color);
-		if (color < 5) {
-			document.getElementById('bank_c' + color).innerHTML = `<a onclick="clickToSelect('gem', ${color});event.preventDefault();"> ${generateSvgGem(color, game.getBank(color), selectMode, true, true)} </a>`;
-		} else {
-			document.getElementById('bank_c' + color).innerHTML = generateSvgGem(color, game.getBank(color), selectMode, true, true);
-		}
-	}
-
+  update_bank()
 
 	for (let player = 0; player < nb_players; player++) {
 		for (let color = 0; color < 6; color++) {
