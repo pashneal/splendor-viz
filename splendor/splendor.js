@@ -716,7 +716,7 @@ function _getSelectMode(itemType, index, lastAction=null, currentMove=true) {
 	return result;
 }
 
-function update_game_nobles() {
+function updateGameNobles() {
   fetch("/replay/nobles")
     .then(response => response.json())
     .then(response => {
@@ -731,7 +731,7 @@ function update_game_nobles() {
     });
 }
 
-function update_game_cards() {
+function updateGameCards() {
   fetch("/replay/cards")
     .then(response => response.json())
     .then(response => {
@@ -751,7 +751,7 @@ function update_game_cards() {
     });
 }
 
-function update_game_decks() {
+function updateGameDecks() {
   fetch("/replay/decks")
     .then(response => response.json())
     .then(response => {
@@ -766,7 +766,7 @@ function update_game_decks() {
     });
 }
 
-function update_game_bank() {
+function updateGameBanks() {
   fetch("/replay/bank")
     .then(response => response.json())
     .then(response => {
@@ -781,7 +781,7 @@ function update_game_bank() {
     });
 }
 
-function update_game_players() {
+function updateGamePlayers() {
   fetch("/replay/players")
     .then(response => response.json())
     .then(response => {
@@ -805,11 +805,11 @@ function refreshBoard() {
 		lastAction = game.getLastActionDetails();
 	}
 
-  update_game_nobles()
-  update_game_cards()
-  update_game_decks()
-  update_game_bank()
-  update_game_players()
+  updateGameNobles()
+  updateGameCards()
+  updateGameDecks()
+  updateGameBanks()
+  updateGamePlayers()
 
 	for (let player = 0; player < nb_players; player++) {
 		for (let rsvIndex = 0; rsvIndex < 3; rsvIndex++) {
