@@ -751,7 +751,7 @@ function update_game_cards() {
     });
 }
 
-function update_decks() {
+function update_game_decks() {
   fetch("/replay/decks")
     .then(response => response.json())
     .then(response => {
@@ -766,7 +766,7 @@ function update_decks() {
     });
 }
 
-function update_bank() {
+function update_game_bank() {
   fetch("/replay/bank")
     .then(response => response.json())
     .then(response => {
@@ -791,8 +791,8 @@ function refreshBoard() {
 
   update_game_nobles()
   update_game_cards()
-  update_decks()
-  update_bank()
+  update_game_decks()
+  update_game_bank()
 
 	for (let player = 0; player < nb_players; player++) {
 		for (let color = 0; color < 6; color++) {
