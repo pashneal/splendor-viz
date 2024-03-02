@@ -780,6 +780,22 @@ function update_game_bank() {
       });
     });
 }
+
+function update_game_players() {
+  fetch("/replay/players")
+    .then(response => response.json())
+    .then(response => {
+      response.success.players.forEach((player, playerIndex) => {
+        // Then update
+        player.developments.forEach(([colorIndex, amount], _) => {
+				  document.getElementById('p' + playerIndex + '_c' + colorIndex).innerHTML = generateSvgNbCards(colorIndex, amount);
+        });
+        player.gems.forEach(([colorIndex, amount], _) => {
+				  document.getElementById('p' + playerIndex + '_g' + colorIndex).innerHTML = generateSvgGem(colorIndex, amount);
+        });
+      });
+    });
+}
 // TODO: Inject all server code here, this is called after 
 // an ai move, see callers ai_play_one_move, ai_play_if_needed
 function refreshBoard() {
@@ -793,24 +809,7 @@ function refreshBoard() {
   update_game_cards()
   update_game_decks()
   update_game_bank()
-
-	for (let player = 0; player < nb_players; player++) {
-
-		for (let color = 0; color < 6; color++) {
-      // TODO: Number of developments
-			if (color < 5) {
-				document.getElementById('p' + player + '_c' + color).innerHTML = generateSvgNbCards(color, game.getPlayerNbCards(player, color));
-			}
-			//if (game.is_human_player(player)) {
-				//let selectMode = _getSelectMode('gemback', color);
-				//document.getElementById('p' + player + '_g' + color).innerHTML = `<a onclick="clickToSelect('gemback', ${color});event.preventDefault();"> ${generateSvgGem(color, game.getPlayerGems(player, color), selectMode)} </a>`;
-			//} else {
-      // TODO: Number of gems
-        let selectMode = (player == game.previousPlayer) ?  _getSelectMode('gemback', color, lastAction, false) : 0;
-        document.getElementById('p' + player + '_g' + color).innerHTML = generateSvgGem(color, game.getPlayerGems(player, color), selectMode);
-			//}
-		}
-	}
+  update_game_players()
 
 	for (let player = 0; player < nb_players; player++) {
 		for (let rsvIndex = 0; rsvIndex < 3; rsvIndex++) {
