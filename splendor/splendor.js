@@ -5,12 +5,12 @@
 /* =================== */
 
 const colors = [
-	["gainsboro"  , "ghostwhite", "black"], // white
-	["dodgerblue" , "mediumblue", "white"], // blue
-	["lightgreen" , "green"     , "white"], // green
-	["tomato"     , "red"       , "white"], // red
-	["dimgray"    , "black"     , "white"], // black
-	["lightyellow", "yellow"    , "black"], // yellow
+	["gainsboro"  , "ghostwhite", "black"], // white (diamond)
+	["dodgerblue" , "mediumblue", "white"], // blue (sapphire)
+	["lightgreen" , "green"     , "white"], // green (emerald)
+	["tomato"     , "red"       , "white"], // red (ruby)
+	["dimgray"    , "black"     , "white"], // black (onyx)
+	["lightyellow", "yellow"    , "black"], // yellow (gold)
 	["darkgray"   , "darkgray"  , "black"]  // For noble
 ];
 
@@ -63,7 +63,9 @@ class Splendor extends AbstractGame {
   }
 
   post_move(action, manualMove) {
+    console.log("Actioned ", action);
 		if (editedGame) {
+      console.log("something");
 			// If game was edited, and that we just took a random card, propose user to edit it
 			if (action < 12+12) {
 				let tier = Math.floor((action%12) / 4);
@@ -656,6 +658,7 @@ function generateSvgNoble(tokens, selected=0) {
 	// Draw background first
 	svg += `<rect width="100%" height="100%" fill="${bgColor}"/>`;
 	svg += `<rect width="50%" height="100%" fill="white" fill-opacity="50%"/>`;
+  console.log(tokens);
 	for (const [index, token] of tokens.entries()) {
 		let [x, y] = tokensCoordNoble[index];
 		let [col, tokValue] = tokens[index];
@@ -713,6 +716,23 @@ function _getSelectMode(itemType, index, lastAction=null, currentMove=true) {
 	return result;
 }
 
+function update_game_nobles() {
+  fetch("/replay/nobles")
+    .then(response => response.json())
+    .then(response => {
+      // Clear all nobles first 
+      for (let index = 0; index < nb_players+1; index++) {
+        document.getElementById('noble' + index).innerHTML = "" 
+      }
+      // Then update from backend
+      response.success.nobles.forEach((tokens, index) => {
+        document.getElementById('noble' + index).innerHTML = generateSvgNoble(tokens);
+      });
+    });
+}
+
+// TODO: Inject all server code here, this is called after 
+// an ai move, see callers ai_play_one_move, ai_play_if_needed
 function refreshBoard() {
 	let lastAction = ['none', -1];
 	if (move_sel.selectedType == 'none') {
@@ -720,16 +740,15 @@ function refreshBoard() {
 		lastAction = game.getLastActionDetails();
 	}
 
-
-	for (let noble = 0; noble < nb_players+1; noble++) {
-		document.getElementById('noble' + noble).innerHTML = generateSvgNoble(game.getNoble(noble));
-	}
+  update_game_nobles()
 
 	for (let tier = 2; tier >= 0; tier--) {
 		for (let index = 0; index < 4; index++) {
 			let cardInfo = game.getTierCard(tier, index);
-			let selectMode = _getSelectMode('card', tier*4+index, lastAction);
-			document.getElementById('lv' + tier + '_' + index).innerHTML = `<a onclick="clickToSelect('card', ${tier*4+index});event.preventDefault();"> ${generateSvgCard(cardInfo[0], cardInfo[1], cardInfo[2], selectMode)} </a>`;
+      /// [tier, points, colors] = cardInfo
+      //  TODO: [Bug] Need to make provisions for card not being available
+			//let selectMode = _getSelectMode('card', tier*4+index, lastAction);
+			document.getElementById('lv' + tier + '_' + index).innerHTML = `<a onclick="clickToSelect('card', ${tier*4+index});event.preventDefault();"> ${generateSvgCard(cardInfo[0], cardInfo[1], cardInfo[2], false)} </a>`;
 		}
 		let selectMode = _getSelectMode('deck', tier, lastAction);
 		let nbCardsInDeck = game.getNbCardsInDeck(tier);
@@ -897,6 +916,46 @@ function afterEdit() {
 	editionOngoing = false;
 
 	return true;
+}
+
+async function nextMove() {
+  fetch("/replay/next", {method : "POST"})
+    .then((r) => r.json())
+    .then(r => {updateMoveInput(r.success.move_index)});
+}
+
+async function prevMove() {
+  fetch("/replay/previous", {method : "POST"})
+    .then((r) => r.json())
+    .then(r => {updateMoveInput(r.success.move_index)});
+}
+
+async function gotoMove(move) {
+  fetch("/replay/goto", 
+    {
+      method : "POST", 
+      body : JSON.stringify({"move_index": move }),  
+      headers: {"Content-type": "application/json; charset=UTF-8"}
+    }
+  ).then((r) => r.json())
+   .then(r => {updateMoveInput(r.success.move_index)});
+}
+
+async function validateInput()  {
+  let is_valid = RegExp("^[0-9]+$").test(document.getElementById("moveInput").value);
+
+  if (is_valid) {
+    document.getElementById("move").classList.remove("error");
+    gotoMove(parseInt(document.getElementById("moveInput").value));
+  } else {
+    document.getElementById("move").classList.add("error");
+  }
+}
+
+async function updateMoveInput(move) {
+  let moveInput = document.getElementById("moveInput");
+  moveInput.value = move.toString();
+  refreshBoard();
 }
 
 var game = new Splendor();

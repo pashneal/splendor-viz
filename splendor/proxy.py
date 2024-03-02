@@ -35,6 +35,7 @@ def init_game(numMCTSSims):
 def getNextState(action):
 	global g, board, mcts, player, history
 	history.insert(0, [player, np.copy(board), action])
+	print(history)
 	board, player = g.getNextState(board, player, action)
 	end = g.getGameEnded(board, player)
 	valids = g.getValidMoves(board, player)

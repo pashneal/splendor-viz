@@ -45,46 +45,22 @@
 </style>
 <body>
 
-<div class="ui borderless menu">
-  <div class="ui container">    
-    <div class="fitted item">
-      <button class="ui icon button" onclick="reset()"><i class="file outline icon"></i></button>
-    </div> 
-    <div class="fitted item"> 
-      <button class="ui icon button" onclick="startEdit()" id="editBtn"><i class="edit icon"></i></button>
-    </div>
-    <div class="fitted item"> 
-      <div class="ui small form">
-        <div class="field">
-          <select onchange="game.change_difficulty(this.value)" id="difficultyForm">
-            <optgroup label="Above optimal">
-            <option value="6400"       >God-like</option>
-            <option value="1600"       >Boosted</option>
-            <optgroup label="Level used during training">
-            <option value="400"        >Native</option>
-            <optgroup label="Sub optimal levels">
-            <option value="100"        >Medium</option>
-            <option value="25" selected>Easy</option>
-            <option value="12"         >Easier</option>
-            <option value="3"          >Come on</option>
-          </select>
-        </div>
+  <div class="ui borderless menu">
+    <div class="ui container">    
+      <div class="fitted item"> 
+        <button class="ui icon button" onclick="prevMove()" id="prevBtn"><i class="arrow left icon"></i></button>
       </div>
-    </div>
-    <div class="fitted item"> 
-      <div class="ui small form">
-        <div class="field">
-          <select onchange="changeGameMode(this.value)">
-            <option value="P0" selected>You vs AI</option>
-            <option value="P1"         >AI vs you</option>
-            <option value="Human"      >No AI</option>
-            <option value="AI"         >WarGames</option>
-          </select>
+      <div class="fitted item"> 
+        <button class="ui icon button" onclick="nextMove()" id="nextBtn"><i class="arrow right icon"></i></button>
+      </div>
+      <div class="fitted item"> 
+        <div id="move" class="ui input">
+          <input id="moveInput" type="text" placeholder="Turn #..."
+            onchange="validateInput()" onkeyup="validateInput()" onclick="validateInput()">
         </div>
       </div>
     </div>
   </div>
-</div>
 
 <div class="ui main text container">
 
